@@ -85,3 +85,18 @@ async fn stdio_prompt(lua: &Lua, options: PromptOptions) -> LuaResult<PromptResu
         .await
         .into_lua_err()
 }
+
+/// Adds a method for an ANSI operation to `LuaUserData` implementations for structs which print
+/// ANSI sequences. See [cursor::Cursor] for usage.
+#[macro_export]
+macro_rules! define_ansi_op {
+($methods:ident,$name:path,($($arg:ident => $type:ty),*)) => {
+        $methods.add_async_function(stringify!($name), |lua: &Lua, ($($arg,)*): ($($type,)*)| async move {
+            $crate::stdio_write(
+                lua,
+                lua.create_string($name($($arg,)*).ansi_escape_sequence())?,
+            )
+            .await
+        })
+    };
+}
