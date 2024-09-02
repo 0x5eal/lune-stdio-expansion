@@ -79,11 +79,11 @@ impl CursorKind {
 }
 
 macro_rules! define_op {
-    ($methods:ident,$name:ident,($($arg:ident => $type:ty),*)) => {
+    ($methods:ident,$name:path,($($arg:ident => $type:ty),*)) => {
         $methods.add_async_function(stringify!($name), |lua: &Lua, ($($arg,)*): ($($type,)*)| async move {
             stdio_write(
                 lua,
-                lua.create_string(CursorKind::$name($($arg,)*).ansi_escape_sequence())?,
+                lua.create_string($name($($arg,)*).ansi_escape_sequence())?,
             )
             .await
         })
@@ -94,14 +94,14 @@ pub struct Cursor;
 
 impl LuaUserData for Cursor {
     fn add_methods<'lua, M: LuaUserDataMethods<'lua, Self>>(methods: &mut M) {
-        define_op!(methods, home, ());
-        define_op!(methods, r#move, (x => usize, y => usize));
-        define_op!(methods, up, (n => usize));
-        define_op!(methods, down, (n => usize));
-        define_op!(methods, left, (n => usize));
-        define_op!(methods, right, (n => usize));
-        define_op!(methods, column, (n => usize));
-        define_op!(methods, save, ());
-        define_op!(methods, restore, ());
+        define_op!(methods, CursorKind::home, ());
+        define_op!(methods, CursorKind::r#move, (x => usize, y => usize));
+        define_op!(methods, CursorKind::up, (n => usize));
+        define_op!(methods, CursorKind::down, (n => usize));
+        define_op!(methods, CursorKind::left, (n => usize));
+        define_op!(methods, CursorKind::right, (n => usize));
+        define_op!(methods, CursorKind::column, (n => usize));
+        define_op!(methods, CursorKind::save, ());
+        define_op!(methods, CursorKind::restore, ());
     }
 }
