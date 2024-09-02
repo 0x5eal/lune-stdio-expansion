@@ -8,6 +8,7 @@ use tokio::io::{stderr, stdin, stdout, AsyncReadExt, AsyncWriteExt};
 
 use lune_utils::TableBuilder;
 
+mod cursor;
 mod prompt;
 mod style_and_color;
 
@@ -34,6 +35,7 @@ pub fn module(lua: &Lua) -> LuaResult<LuaTable> {
         .with_async_function("ewrite", stdio_ewrite)?
         .with_async_function("readToEnd", stdio_read_to_end)?
         .with_async_function("prompt", stdio_prompt)?
+        .with_value("cursor", cursor::Cursor)?
         .build_readonly()
 }
 
