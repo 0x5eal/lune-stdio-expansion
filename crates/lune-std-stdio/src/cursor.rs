@@ -1,7 +1,5 @@
 use mlua::prelude::*;
 
-use crate::define_ansi_op;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CursorKind {
     /// Moves the cursor to `(0, 0)`
@@ -78,18 +76,25 @@ impl CursorKind {
     }
 }
 
-pub struct Cursor;
+macro_rules! define_cursor_op {
+($methods:ident,$name:ident,($($arg:ident => $type:ty),*)) => {
+        $methods.add_function(stringify!($name), |lua: &Lua, ($($arg,)*): ($($type,)*)| {
+            lua.create_string(CursorKind::$name($($arg,)*).ansi_escape_sequence())
+        })
+    };
+}
 
+pub struct Cursor;
 impl LuaUserData for Cursor {
     fn add_methods<'lua, M: LuaUserDataMethods<'lua, Self>>(methods: &mut M) {
-        define_ansi_op!(methods, CursorKind::home, ());
-        define_ansi_op!(methods, CursorKind::r#move, (x => usize, y => usize));
-        define_ansi_op!(methods, CursorKind::up, (n => usize));
-        define_ansi_op!(methods, CursorKind::down, (n => usize));
-        define_ansi_op!(methods, CursorKind::left, (n => usize));
-        define_ansi_op!(methods, CursorKind::right, (n => usize));
-        define_ansi_op!(methods, CursorKind::column, (n => usize));
-        define_ansi_op!(methods, CursorKind::save, ());
-        define_ansi_op!(methods, CursorKind::restore, ());
+        define_cursor_op!(methods, home, ());
+        define_cursor_op!(methods, r#move, (x => usize, y => usize));
+        define_cursor_op!(methods, up, (n => usize));
+        define_cursor_op!(methods, down, (n => usize));
+        define_cursor_op!(methods, left, (n => usize));
+        define_cursor_op!(methods, right, (n => usize));
+        define_cursor_op!(methods, column, (n => usize));
+        define_cursor_op!(methods, save, ());
+        define_cursor_op!(methods, restore, ());
     }
 }

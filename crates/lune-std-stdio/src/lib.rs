@@ -11,6 +11,7 @@ use lune_utils::TableBuilder;
 mod cursor;
 mod prompt;
 mod style_and_color;
+mod term;
 
 use self::prompt::{prompt, PromptOptions, PromptResult};
 use self::style_and_color::{ColorKind, StyleKind};
@@ -36,6 +37,7 @@ pub fn module(lua: &Lua) -> LuaResult<LuaTable> {
         .with_async_function("readToEnd", stdio_read_to_end)?
         .with_async_function("prompt", stdio_prompt)?
         .with_value("cursor", cursor::Cursor)?
+        .with_value("term", term::create(lua)?)?
         .build_readonly()
 }
 
@@ -84,19 +86,4 @@ async fn stdio_prompt(lua: &Lua, options: PromptOptions) -> LuaResult<PromptResu
     lua.spawn_blocking(move || prompt(options))
         .await
         .into_lua_err()
-}
-
-/// Adds a method for an ANSI operation to `LuaUserData` implementations for structs which print
-/// ANSI sequences. See [cursor::Cursor] for usage.
-#[macro_export]
-macro_rules! define_ansi_op {
-($methods:ident,$name:path,($($arg:ident => $type:ty),*)) => {
-        $methods.add_async_function(stringify!($name), |lua: &Lua, ($($arg,)*): ($($type,)*)| async move {
-            $crate::stdio_write(
-                lua,
-                lua.create_string($name($($arg,)*).ansi_escape_sequence())?,
-            )
-            .await
-        })
-    };
 }
