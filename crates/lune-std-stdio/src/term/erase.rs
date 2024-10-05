@@ -1,6 +1,5 @@
 use std::str::FromStr;
 
-use lune_utils::TableBuilder;
 use mlua::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -19,23 +18,6 @@ pub enum EraseKind {
     LineStart,
     /// Clears the saved lines.
     Saved,
-}
-
-pub fn create(lua: &Lua) -> LuaResult<LuaTable> {
-    TableBuilder::new(lua)?
-        .with_metatable(
-            TableBuilder::new(lua)?
-                .with_function(
-                    LuaMetaMethod::Index.name(),
-                    |lua: &Lua, (_, kind): (LuaTable, EraseKind)| {
-                        lua.create_function(move |lua: &Lua, (): ()| {
-                            lua.create_string(kind.ansi_escape_sequence())
-                        })
-                    },
-                )?
-                .build()?,
-        )?
-        .build()
 }
 
 impl EraseKind {

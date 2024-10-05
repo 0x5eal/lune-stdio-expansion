@@ -1,5 +1,7 @@
 use mlua::prelude::*;
 
+// TODO: ShowCursor and HideCursor
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CursorKind {
     /// Moves the cursor to `(0, 0)`
