@@ -1,7 +1,5 @@
 use mlua::prelude::*;
 
-// TODO: ShowCursor and HideCursor
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CursorKind {
     /// Moves the cursor to `(0, 0)`
@@ -22,6 +20,10 @@ pub enum CursorKind {
     Save,
     /// Restores the cursor position
     Restore,
+    /// Shows the cursor if hidden
+    ShowCursor,
+    /// Hides the cursor if not already hidden
+    HideCursor,
 }
 
 impl CursorKind {
@@ -61,6 +63,14 @@ impl CursorKind {
         Self::Restore
     }
 
+    pub fn show() -> Self {
+        Self::ShowCursor
+    }
+
+    pub fn hide() -> Self {
+        Self::HideCursor
+    }
+
     pub fn ansi_escape_sequence(self) -> String {
         match self {
             Self::Home => "\x1b[H".to_string(),
@@ -74,6 +84,9 @@ impl CursorKind {
             // FIXME: These two might not be correct, actually confirm them
             Self::Save => "\x1b 7".to_string(),
             Self::Restore => "\x1b 8".to_string(),
+
+            Self::ShowCursor => "\x1b[?25h".to_string(),
+            Self::HideCursor => "\x1b[?25l".to_string(),
         }
     }
 }
