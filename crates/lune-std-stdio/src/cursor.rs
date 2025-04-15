@@ -111,5 +111,7 @@ impl LuaUserData for Cursor {
         define_cursor_op!(methods, column, (n => usize));
         define_cursor_op!(methods, save, ());
         define_cursor_op!(methods, restore, ());
+        define_cursor_op!(methods, show, ());
+        define_cursor_op!(methods, hide, ());
     }
 }
